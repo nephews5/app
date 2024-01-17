@@ -16,13 +16,16 @@ volumes:
 
 services:
 
-  nginx:
+  wordpress-server:
     image: nginx:stable-alpine3.17-perl
-    container_name: nginx
-    hostname: nginx
+    container_name: wordpress-server
+    hostname: wordpress-server
     restart: unless-stopped
     tty: true
     volumes:
+      - type: bind
+        source: wordpress/src
+        target: /var/www/html
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - wordpress
@@ -39,6 +42,10 @@ services:
     hostname: wordpress
     restart: unless-stopped
     tty: true
+    volumes:
+      - type: bind
+        source: wordpress/src
+        target: /var/www/html
     depends_on: 
       - mysql
     networks:
