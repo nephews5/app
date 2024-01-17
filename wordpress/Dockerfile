@@ -1,2 +1,3 @@
-FROM wordpress:6.4.2-php8.3-fpm-alpine
+FROM wordpress:5-fpm-alpine
+COPY src /var/www/html
 EXPOSE 9000
