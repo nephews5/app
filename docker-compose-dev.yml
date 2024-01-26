@@ -17,7 +17,9 @@ volumes:
 services:
 
   wordpress-server:
-    image: nginx:stable-alpine3.17-perl
+    build:
+      context: nginx
+      dockerfile: Dockerfile
     container_name: wordpress-server
     hostname: wordpress-server
     restart: unless-stopped
@@ -26,12 +28,11 @@ services:
       - type: bind
         source: wordpress/src
         target: /var/www/html
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/default.conf:/etc/nginx/http.d/default.conf
     depends_on:
       - wordpress
       - mysql
     networks:
-      - temp-gateway
       - temp-app
 
   wordpress: 
