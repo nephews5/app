@@ -1,0 +1,75 @@
+---
+version: "3.8"
+ 
+networks:
+  temp-gateway:
+    external: true
+  temp-app:
+    external: true
+  temp-db: 
+    external: true
+
+volumes:
+  mysql:
+    driver: local
+
+
+services:
+
+  wordpress-server:
+    image: nginx:stable-alpine3.17-perl
+    container_name: wordpress-server
+    hostname: wordpress-server
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - type: bind
+        source: wordpress/src
+        target: /var/www/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - wordpress
+      - mysql
+    networks:
+      - temp-gateway
+      - temp-app
+
+  wordpress: 
+    build: 
+      context: wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress
+    hostname: wordpress
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - type: bind
+        source: wordpress/src
+        target: /var/www/html
+    depends_on: 
+      - mysql
+    networks:
+      - temp-app
+      - temp-db
+    environment:
+      WORDPRESS_DB_HOST     : ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_USER     : ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD : ${WORDPRESS_DB_PASSWORD} 
+      WORDPRESS_DB_NAME     : ${WORDPRESS_DB_NAME}
+
+  mysql:
+    image: mysql:5.6.51
+    container_name: mysql
+    hostname: mysql
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - temp-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE:      ${MYSQL_DATABASE}    
+      MYSQL_USER:          ${MYSQL_USER}         
+      MYSQL_PASSWORD:      ${MYSQL_PASSWORD}
+
